@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>フレーズ30マスター</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; color: #1a1a1a; background: #fff; }
+  #app { max-width: 480px; margin: 0 auto; min-height: 100vh; }
+  .clickable { cursor: pointer; user-select: none; }
+  button { font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const PHRASES = [
+  { id: 1, ja: "お名前は何ですか？", variants: [{ pt: "Qual é o seu nome?", hint: "" }] },
+  { id: 2, ja: "出身地はどこですか？", variants: [{ pt: "De onde você é?", hint: "" }] },
+  { id: 3, ja: "どこに住んでいますか？", variants: [{ pt: "Onde você mora?", hint: "" }] },
+  { id: 4, ja: "元気ですか？", variants: [{ pt: "Tudo bem?", hint: "" }, { pt: "Como você está?", hint: "" }] },
+  { id: 5, ja: "あなたはどうですか？", variants: [{ pt: "E você?", hint: "" }] },
+  { id: 6, ja: "はじめまして", variants: [{ pt: "Prazer em conhecê-lo.", hint: "" }, { pt: "Muito prazer.", hint: "" }] },
+  { id: 7, ja: "何をしていますか？", variants: [{ pt: "O que você está fazendo?", hint: "" }, { pt: "O que você faz?", hint: "職業" }] },
+  { id: 8, ja: "○○語を話しますか？", variants: [{ pt: "Você fala japonês?", hint: "日本語" }, { pt: "Você fala inglês?", hint: "英語" }, { pt: "Você fala português?", hint: "ポルトガル語" }] },
+  { id: 9, ja: "なぜ○○語を勉強していますか？", variants: [{ pt: "Por que você está estudando português?", hint: "ポルトガル語" }, { pt: "Por que você está estudando japonês?", hint: "日本語" }] },
+  { id: 10, ja: "なぜなら○○だからです", variants: [{ pt: "Porque eu gosto do Brasil.", hint: "ブラジルが好き" }, { pt: "Porque eu quero viajar.", hint: "旅行したい" }, { pt: "Porque é divertido.", hint: "楽しい" }] },
+  { id: 11, ja: "どれくらい○○語を学んでいますか？", variants: [{ pt: "Há quanto tempo você estuda português?", hint: "ポルトガル語" }] },
+  { id: 12, ja: "趣味は何ですか？", variants: [{ pt: "Qual é o seu hobby?", hint: "" }, { pt: "O que você gosta de fazer?", hint: "" }] },
+  { id: 13, ja: "○○したことがありますか？", variants: [{ pt: "Você já foi ao Japão?", hint: "日本に行った" }, { pt: "Você já comeu sushi?", hint: "寿司を食べた" }, { pt: "Você já viajou para fora do país?", hint: "海外旅行" }] },
+  { id: 14, ja: "○○してもいいですか？", variants: [{ pt: "Posso sentar aqui?", hint: "ここに座る" }, { pt: "Posso tirar uma foto?", hint: "写真を撮る" }, { pt: "Posso usar o banheiro?", hint: "トイレを使う" }] },
+  { id: 15, ja: "いつ○○しましたか？", variants: [{ pt: "Quando você chegou?", hint: "到着した" }, { pt: "Quando você começou?", hint: "始めた" }] },
+  { id: 16, ja: "○○が好きですか？", variants: [{ pt: "Você gosta de música?", hint: "音楽" }, { pt: "Você gosta de futebol?", hint: "サッカー" }, { pt: "Você gosta de comida japonesa?", hint: "日本料理" }] },
+  { id: 17, ja: "○○はどういう意味ですか？", variants: [{ pt: "O que significa 'saudade'?", hint: "saudade" }, { pt: "O que significa isso?", hint: "これ" }] },
+  { id: 18, ja: "○○ができますか？", variants: [{ pt: "Você pode me ajudar?", hint: "手伝う" }, { pt: "Você sabe nadar?", hint: "泳ぐ" }, { pt: "Você sabe cozinhar?", hint: "料理する" }] },
+  { id: 19, ja: "○○がありますか？", variants: [{ pt: "Tem Wi-Fi aqui?", hint: "Wi-Fi" }, { pt: "Você tem irmãos?", hint: "兄弟" }, { pt: "Tem cardápio em inglês?", hint: "英語メニュー" }] },
+  { id: 20, ja: "もう一度言ってください", variants: [{ pt: "Pode repetir, por favor?", hint: "" }, { pt: "Fala de novo, por favor?", hint: "カジュアル" }] },
+  { id: 21, ja: "○○はいくらですか？", variants: [{ pt: "Quanto custa isso?", hint: "これ" }, { pt: "Quanto custa uma cerveja?", hint: "ビール" }] },
+  { id: 22, ja: "○○に行きたいです", variants: [{ pt: "Eu quero ir para a praia.", hint: "ビーチ" }, { pt: "Eu quero ir ao centro.", hint: "中心街" }, { pt: "Eu quero ir para São Paulo.", hint: "サンパウロ" }] },
+  { id: 23, ja: "○○まではどうやって行きますか？", variants: [{ pt: "Como eu chego ao aeroporto?", hint: "空港" }, { pt: "Como eu chego à estação?", hint: "駅" }, { pt: "Como eu chego ao hotel?", hint: "ホテル" }] },
+  { id: 24, ja: "どの○○ですか？", variants: [{ pt: "Qual ônibus eu pego?", hint: "バス" }, { pt: "Qual é o melhor restaurante?", hint: "レストラン" }] },
+  { id: 25, ja: "あの方はどなたですか？", variants: [{ pt: "Quem é aquela pessoa?", hint: "" }, { pt: "Quem é ele?", hint: "" }] },
+  { id: 26, ja: "何時ですか？", variants: [{ pt: "Que horas são?", hint: "" }] },
+  { id: 27, ja: "おすすめの料理は何ですか？", variants: [{ pt: "O que você recomenda?", hint: "" }, { pt: "Qual prato você recomenda?", hint: "" }] },
+  { id: 28, ja: "これをください", variants: [{ pt: "Eu quero isso, por favor.", hint: "" }, { pt: "Me dá isso, por favor.", hint: "カジュアル" }] },
+  { id: 29, ja: "お会計をお願いします", variants: [{ pt: "A conta, por favor.", hint: "" }] },
+  { id: 30, ja: "○○していただけますか？", variants: [{ pt: "Você poderia falar mais devagar?", hint: "ゆっくり話す" }, { pt: "Você poderia me mostrar no mapa?", hint: "地図で見せる" }, { pt: "Você poderia escrever isso?", hint: "書いてもらう" }] },
+];
+
+// ===== state =====
+let progress = {};
+try {
+  const saved = localStorage.getItem("pt30_progress");
+  if (saved) progress = JSON.parse(saved);
+} catch (e) {}
+
+const saveProgress = () => {
+  try { localStorage.setItem("pt30_progress", JSON.stringify(progress)); } catch (e) {}
+};
+
+// ===== TTS (Web Speech API - works when opened as local file) =====
+let ptVoice = null;
+const pickVoice = () => {
+  const voices = speechSynthesis.getVoices();
+  // prefer Luciana (natural female pt-BR)
+  ptVoice = voices.find(v => v.name === "Luciana")
+    || voices.find(v => v.lang === "pt-BR" && /flo|sandy|shelley|female|luciana/i.test(v.name))
+    || voices.find(v => v.lang === "pt-BR")
+    || voices.find(v => v.lang.startsWith("pt"))
+    || null;
+};
+if (window.speechSynthesis) {
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+
+const speak = (text) => {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "pt-BR";
+  u.rate = 1.0;
+  if (ptVoice) u.voice = ptVoice;
+  speechSynthesis.speak(u);
+};
+
+// ===== helpers =====
+const shuffle = (arr) => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+const randVarIdx = (p) => Math.floor(Math.random() * p.variants.length);
+const fillJa = (p, v) => (p.ja.includes("○○") && v.hint ? p.ja.replace("○○", v.hint) : p.ja);
+const getStatus = (s) => {
+  if (!s || s.total === 0) return "new";
+  if (s.total >= 3 && s.correct / s.total >= 0.8) return "mastered";
+  if (s.total >= 1) return "learning";
+  return "new";
+};
+const STATUS = {
+  mastered: { bg: "#dcfce7", text: "#166534", label: "習得済み" },
+  learning: { bg: "#fef9c3", text: "#854d0e", label: "練習中" },
+  new: { bg: "#f3f4f6", text: "#6b7280", label: "未学習" },
+};
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+const app = document.getElementById("app");
+let state = { mode: "home" };
+
+// ===== render router =====
+const render = () => {
+  if (state.mode === "home") renderHome();
+  else if (state.mode === "flash") renderFlash();
+  else if (state.mode === "quiz") renderQuiz();
+  else if (state.mode === "listening") renderListening();
+  else if (state.mode === "list") renderList();
+  else if (state.mode === "dashboard") renderDashboard();
+};
+const go = (mode) => { state = { mode }; render(); };
+
+// ===== HOME =====
+const renderHome = () => {
+  const mastered = PHRASES.filter(p => getStatus(progress[p.id]) === "mastered").length;
+  const learning = PHRASES.filter(p => getStatus(progress[p.id]) === "learning").length;
+  const pct = Math.round((mastered / 30) * 100);
+
+  const card = (mode, icon, label, desc, bg, color) =>
+    `<div class="clickable" data-go="${mode}" style="padding:16px 20px;border-radius:12px;background:${bg};">
+      <div style="font-size:15px;font-weight:600;color:${color};">${icon} ${label}</div>
+      <div style="font-size:12px;color:#666;margin-top:4px;">${desc}</div>
+    </div>`;
+
+  app.innerHTML = `
+  <div style="padding:32px 20px;">
+    <h1 style="font-size:22px;font-weight:700;margin-bottom:4px;">🇧🇷 フレーズ30マスター</h1>
+    <p style="color:#666;font-size:14px;margin-bottom:28px;">ブラジルポルトガル語 基本フレーズ</p>
+    <div style="background:#f8fafc;border-radius:16px;padding:20px;margin-bottom:24px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+        <span style="font-size:14px;font-weight:600;">習得率</span>
+        <span style="font-size:14px;font-weight:700;color:#059669;">${pct}%</span>
+      </div>
+      <div style="background:#e5e7eb;border-radius:8px;height:10px;overflow:hidden;margin-bottom:16px;">
+        <div style="background:linear-gradient(90deg,#059669,#34d399);height:100%;width:${pct}%;border-radius:8px;"></div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:13px;">
+        <span><b style="color:#059669;">${mastered}</b> 習得済み</span>
+        <span><b style="color:#ca8a04;">${learning}</b> 練習中</span>
+        <span><b style="color:#9ca3af;">${30 - mastered - learning}</b> 未学習</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      ${card("flash", "📖", "フラッシュカード", "ランダム順でインプット練習", "#f0fdf4", "#166534")}
+      ${card("quiz", "✅", "クイズ", "4択で実力チェック＆進捗記録", "#eff6ff", "#1e40af")}
+      ${card("listening", "🎧", "リスニング", "音声を聞いて日本語の意味を当てる", "#fff7ed", "#c2410c")}
+      ${card("list", "📒", "単語帳", "全フレーズ＆バリエーション一覧", "#fefce8", "#854d0e")}
+      ${card("dashboard", "📊", "ダッシュボード", "30フレーズの習得状況を確認", "#f5f3ff", "#5b21b6")}
+    </div>
+    <div style="margin-top:32px;text-align:center;">
+      <span class="clickable" id="resetBtn" style="font-size:12px;color:#aaa;">進捗をリセット</span>
+    </div>
+  </div>`;
+
+  app.querySelectorAll("[data-go]").forEach(el => el.onclick = () => go(el.dataset.go));
+  document.getElementById("resetBtn").onclick = function () {
+    if (this.dataset.confirm) {
+      progress = {}; saveProgress(); renderHome();
+    } else {
+      this.textContent = "もう一度タップでリセット確定";
+      this.style.color = "#ef4444";
+      this.dataset.confirm = "1";
+    }
+  };
+};
+
+// ===== FLASHCARD =====
+let fc = {};
+const renderFlash = () => {
+  if (!fc.cards) {
+    fc = { cards: shuffle(PHRASES), idx: 0, flipped: false, vi: 0, round: 1 };
+    fc.vi = randVarIdx(fc.cards[0]);
+  }
+  const c = fc.cards[fc.idx];
+  const v = c.variants[fc.vi % c.variants.length];
+  const ja = fillJa(c, v);
+  const isLast = fc.idx === 29;
+
+  const varBtns = (c.variants.length > 1 && fc.flipped)
+    ? `<div style="margin-top:12px;text-align:center;">
+        <div style="font-size:12px;color:#999;margin-bottom:6px;">バリエーション:</div>
+        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+        ${c.variants.map((vr, i) =>
+          `<span class="clickable" data-vi="${i}" style="font-size:12px;padding:4px 10px;border-radius:6px;background:${i === (fc.vi % c.variants.length) ? "#059669" : "#f3f4f6"};color:${i === (fc.vi % c.variants.length) ? "#fff" : "#666"};">${esc(vr.hint || String(i + 1))}</span>`
+        ).join("")}
+        </div></div>`
+    : "";
+
+  app.innerHTML = `
+  <div style="padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <span class="clickable" id="back" style="font-size:14px;color:#666;">← 戻る</span>
+      <span style="font-size:13px;color:#999;">${fc.round > 1 ? fc.round + "周目 · " : ""}${fc.idx + 1} / 30</span>
+    </div>
+    <div class="clickable" id="card" style="background:${fc.flipped ? "#f0fdf4" : "#fff"};border-radius:16px;padding:32px;min-height:200px;display:flex;flex-direction:column;justify-content:center;align-items:center;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+      <div style="font-size:13px;color:#999;margin-bottom:8px;">${fc.flipped ? "ポルトガル語" : "日本語"}</div>
+      <div style="font-size:20px;font-weight:600;text-align:center;line-height:1.5;">${esc(fc.flipped ? v.pt : ja)}</div>
+      ${v.hint && !fc.flipped && c.ja.includes("○○") ? `<div style="font-size:12px;color:#999;margin-top:8px;">（${esc(v.hint)}）</div>` : ""}
+      ${fc.flipped ? `<span class="clickable" id="speak" style="margin-top:16px;background:#059669;color:#fff;border-radius:8px;padding:8px 20px;font-size:14px;font-weight:500;">🔊 発音を聞く</span>` : `<div style="font-size:12px;color:#bbb;margin-top:16px;">タップして答えを見る</div>`}
+    </div>
+    ${varBtns}
+    <div style="display:flex;justify-content:space-between;margin-top:24px;gap:12px;">
+      <span class="clickable" id="prev" style="flex:1;padding:14px;border-radius:10px;text-align:center;font-size:14px;font-weight:500;background:${fc.idx === 0 ? "#f3f4f6" : "#e5e7eb"};color:${fc.idx === 0 ? "#ccc" : "#333"};">← 前へ</span>
+      <span class="clickable" id="next" style="flex:1;padding:14px;border-radius:10px;text-align:center;font-size:14px;font-weight:500;background:#1e40af;color:#fff;">${isLast ? "🔄 もう1周" : "次へ →"}</span>
+    </div>
+  </div>`;
+
+  document.getElementById("back").onclick = () => { fc = {}; go("home"); };
+  document.getElementById("card").onclick = () => { fc.flipped = !fc.flipped; renderFlash(); };
+  if (document.getElementById("speak")) document.getElementById("speak").onclick = (e) => { e.stopPropagation(); speak(v.pt); };
+  app.querySelectorAll("[data-vi]").forEach(el => el.onclick = (e) => { e.stopPropagation(); fc.vi = +el.dataset.vi; speak(c.variants[+el.dataset.vi].pt); renderFlash(); });
+  document.getElementById("prev").onclick = () => {
+    if (fc.idx > 0) { fc.idx--; fc.vi = randVarIdx(fc.cards[fc.idx]); fc.flipped = false; renderFlash(); }
+  };
+  document.getElementById("next").onclick = () => {
+    if (fc.idx < 29) { fc.idx++; fc.vi = randVarIdx(fc.cards[fc.idx]); fc.flipped = false; }
+    else { fc.cards = shuffle(PHRASES); fc.idx = 0; fc.vi = randVarIdx(fc.cards[0]); fc.flipped = false; fc.round++; }
+    renderFlash();
+  };
+};
+
+// ===== QUIZ =====
+let qz = {};
+const buildQuiz = () => {
+  const sorted = [...PHRASES].sort((a, b) => {
+    const ra = progress[a.id] && progress[a.id].total > 0 ? progress[a.id].correct / progress[a.id].total : 0.5;
+    const rb = progress[b.id] && progress[b.id].total > 0 ? progress[b.id].correct / progress[b.id].total : 0.5;
+    return ra - rb;
+  });
+  const ordered = [...shuffle(sorted.slice(0, 10)), ...shuffle(sorted.slice(10))];
+  return ordered.map(p => {
+    const cor = p.variants[randVarIdx(p)];
+    const wrongs = shuffle(PHRASES.filter(x => x.id !== p.id)).slice(0, 3).map(w => w.variants[randVarIdx(w)].pt);
+    return { p, v: cor, ja: fillJa(p, cor), correctPt: cor.pt, opts: shuffle([cor.pt, ...wrongs]) };
+  });
+};
+const renderQuiz = () => {
+  if (!qz.qs) qz = { qs: buildQuiz(), qi: 0, sel: null, score: 0, done: false };
+
+  if (qz.done) {
+    const pct = Math.round((qz.score / 30) * 100);
+    app.innerHTML = `
+    <div style="padding:32px 20px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:16px;">${pct >= 80 ? "🎉" : pct >= 50 ? "💪" : "📚"}</div>
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;">クイズ完了！</h2>
+      <div style="font-size:32px;font-weight:700;color:${pct >= 80 ? "#059669" : pct >= 50 ? "#ca8a04" : "#dc2626"};margin-bottom:8px;">${pct}%</div>
+      <div style="font-size:14px;color:#666;margin-bottom:32px;">${qz.score} / 30 正解</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span class="clickable" id="again" style="padding:14px;border-radius:10px;background:#1e40af;color:#fff;font-size:14px;font-weight:600;">もう一度</span>
+        <span class="clickable" id="home" style="padding:14px;border-radius:10px;background:#f3f4f6;color:#333;font-size:14px;font-weight:500;">ホームに戻る</span>
+      </div>
+    </div>`;
+    document.getElementById("again").onclick = () => { qz = {}; renderQuiz(); };
+    document.getElementById("home").onclick = () => { qz = {}; go("home"); };
+    return;
+  }
+
+  const q = qz.qs[qz.qi];
+  const opts = q.opts.map((o, i) => {
+    let bg = "#fff", bd = "1px solid #e5e7eb", cl = "#1a1a1a";
+    if (qz.sel !== null) {
+      if (o === q.correctPt) { bg = "#dcfce7"; bd = "2px solid #059669"; cl = "#166534"; }
+      else if (o === qz.sel) { bg = "#fee2e2"; bd = "2px solid #dc2626"; cl = "#991b1b"; }
+    }
+    return `<div class="clickable" data-opt="${esc(o)}" style="padding:14px 16px;border-radius:10px;border:${bd};background:${bg};color:${cl};font-size:14px;line-height:1.4;">${esc(o)}</div>`;
+  }).join("");
+
+  app.innerHTML = `
+  <div style="padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span class="clickable" id="back" style="font-size:14px;color:#666;">← 戻る</span>
+      <span style="font-size:13px;color:#999;">${qz.qi + 1} / 30</span>
+    </div>
+    <div style="background:#e5e7eb;border-radius:6px;height:4px;margin-bottom:24px;overflow:hidden;">
+      <div style="background:#1e40af;height:100%;width:${((qz.qi + 1) / 30) * 100}%;"></div>
+    </div>
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-size:12px;color:#999;margin-bottom:8px;">この日本語をポルトガル語で？</div>
+      <div style="font-size:20px;font-weight:600;line-height:1.5;">${esc(q.ja)}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">${opts}</div>
+    <div id="footer" style="text-align:center;"></div>
+  </div>`;
+
+  document.getElementById("back").onclick = () => { qz = {}; go("home"); };
+  if (qz.sel === null) {
+    app.querySelectorAll("[data-opt]").forEach(el => el.onclick = () => {
+      qz.sel = el.dataset.opt;
+      const ok = qz.sel === q.correctPt;
+      if (ok) { qz.score++; speak(q.correctPt); }
+      const prev = progress[q.p.id] || { correct: 0, total: 0 };
+      progress[q.p.id] = { correct: prev.correct + (ok ? 1 : 0), total: prev.total + 1 };
+      saveProgress();
+      renderQuiz();
+    });
+  } else {
+    const footer = document.getElementById("footer");
+    footer.innerHTML =
+      (qz.sel !== q.correctPt ? `<span class="clickable" id="hear" style="margin-bottom:12px;border:1px solid #059669;border-radius:8px;padding:8px 16px;color:#059669;font-size:13px;display:inline-block;">🔊 正解の発音を聞く</span><br>` : "") +
+      `<span class="clickable" id="next" style="display:inline-block;width:100%;padding:14px;border-radius:10px;background:#1e40af;color:#fff;font-size:14px;font-weight:600;box-sizing:border-box;">${qz.qi === 29 ? "結果を見る" : "次の問題 →"}</span>`;
+    if (document.getElementById("hear")) document.getElementById("hear").onclick = () => speak(q.correctPt);
+    document.getElementById("next").onclick = () => {
+      if (qz.qi < 29) { qz.qi++; qz.sel = null; renderQuiz(); }
+      else { qz.done = true; renderQuiz(); }
+    };
+  }
+};
+
+// ===== LISTENING =====
+let ls = {};
+const buildListening = () => {
+  return shuffle(PHRASES).map(p => {
+    const cor = p.variants[randVarIdx(p)];
+    const ja = fillJa(p, cor);
+    const wrongs = shuffle(PHRASES.filter(x => x.id !== p.id)).slice(0, 3).map(w => {
+      const wv = w.variants[randVarIdx(w)];
+      return fillJa(w, wv);
+    });
+    return { p, v: cor, correctJa: ja, pt: cor.pt, opts: shuffle([ja, ...wrongs]) };
+  });
+};
+const renderListening = () => {
+  if (!ls.qs) ls = { qs: buildListening(), qi: 0, sel: null, score: 0, done: false };
+
+  if (ls.done) {
+    const pct = Math.round((ls.score / 30) * 100);
+    app.innerHTML = `
+    <div style="padding:32px 20px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:16px;">${pct >= 80 ? "🎉" : pct >= 50 ? "💪" : "📚"}</div>
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;">リスニング完了！</h2>
+      <div style="font-size:32px;font-weight:700;color:${pct >= 80 ? "#059669" : pct >= 50 ? "#ca8a04" : "#dc2626"};margin-bottom:8px;">${pct}%</div>
+      <div style="font-size:14px;color:#666;margin-bottom:32px;">${ls.score} / 30 正解</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span class="clickable" id="again" style="padding:14px;border-radius:10px;background:#c2410c;color:#fff;font-size:14px;font-weight:600;">もう一度</span>
+        <span class="clickable" id="home" style="padding:14px;border-radius:10px;background:#f3f4f6;color:#333;font-size:14px;font-weight:500;">ホームに戻る</span>
+      </div>
+    </div>`;
+    document.getElementById("again").onclick = () => { ls = {}; renderListening(); };
+    document.getElementById("home").onclick = () => { ls = {}; go("home"); };
+    return;
+  }
+
+  const q = ls.qs[ls.qi];
+  const opts = q.opts.map((o) => {
+    let bg = "#fff", bd = "1px solid #e5e7eb", cl = "#1a1a1a";
+    if (ls.sel !== null) {
+      if (o === q.correctJa) { bg = "#dcfce7"; bd = "2px solid #059669"; cl = "#166534"; }
+      else if (o === ls.sel) { bg = "#fee2e2"; bd = "2px solid #dc2626"; cl = "#991b1b"; }
+    }
+    return `<div class="clickable" data-opt="${esc(o)}" style="padding:14px 16px;border-radius:10px;border:${bd};background:${bg};color:${cl};font-size:14px;line-height:1.4;">${esc(o)}</div>`;
+  }).join("");
+
+  app.innerHTML = `
+  <div style="padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span class="clickable" id="back" style="font-size:14px;color:#666;">← 戻る</span>
+      <span style="font-size:13px;color:#999;">${ls.qi + 1} / 30</span>
+    </div>
+    <div style="background:#e5e7eb;border-radius:6px;height:4px;margin-bottom:24px;overflow:hidden;">
+      <div style="background:#c2410c;height:100%;width:${((ls.qi + 1) / 30) * 100}%;"></div>
+    </div>
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-size:12px;color:#999;margin-bottom:12px;">ポルトガル語を聞いて、日本語の意味を選ぼう</div>
+      <span class="clickable" id="listen" style="display:inline-block;background:#fff7ed;border:2px solid #c2410c;border-radius:16px;padding:20px 32px;font-size:18px;color:#c2410c;font-weight:600;">🔊 聞く</span>
+      ${ls.sel !== null ? `<div style="margin-top:12px;font-size:14px;color:#666;background:#f8fafc;border-radius:8px;padding:8px 12px;display:inline-block;">${esc(q.pt)}</div>` : ""}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">${opts}</div>
+    <div id="footer" style="text-align:center;"></div>
+  </div>`;
+
+  document.getElementById("back").onclick = () => { ls = {}; go("home"); };
+  document.getElementById("listen").onclick = () => speak(q.pt);
+  if (ls.sel === null) {
+    app.querySelectorAll("[data-opt]").forEach(el => el.onclick = () => {
+      ls.sel = el.dataset.opt;
+      if (ls.sel === q.correctJa) ls.score++;
+      renderListening();
+    });
+  } else {
+    document.getElementById("footer").innerHTML =
+      `<span class="clickable" id="next" style="display:inline-block;width:100%;padding:14px;border-radius:10px;background:#c2410c;color:#fff;font-size:14px;font-weight:600;box-sizing:border-box;">${ls.qi === 29 ? "結果を見る" : "次の問題 →"}</span>`;
+    document.getElementById("next").onclick = () => {
+      if (ls.qi < 29) { ls.qi++; ls.sel = null; renderListening(); }
+      else { ls.done = true; renderListening(); }
+    };
+  }
+};
+
+// ===== PHRASE LIST =====
+let openId = null;
+const renderList = () => {
+  const items = PHRASES.map(p => {
+    const open = openId === p.id;
+    const body = open ? `<div style="padding:0 14px 14px;border-top:1px solid #f3f4f6;">
+      ${p.variants.map((v, i) => {
+        const ja = fillJa(p, v);
+        return `<div style="padding:10px 0;border-bottom:${i < p.variants.length - 1 ? "1px solid #f3f4f6" : "none"};">
+          <div style="font-size:13px;color:#666;margin-bottom:4px;">${esc(ja)}${v.hint && p.ja.includes("○○") ? ` <span style="font-size:11px;color:#aaa;">(${esc(v.hint)})</span>` : ""}</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="font-size:15px;font-weight:600;color:#166534;flex:1;">${esc(v.pt)}</div>
+            <span class="clickable" data-speak="${esc(v.pt)}" style="background:#059669;color:#fff;border-radius:6px;padding:4px 10px;font-size:12px;">🔊</span>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>` : "";
+    return `<div style="border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;background:#fff;">
+      <div class="clickable" data-toggle="${p.id}" style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+        <div><span style="color:#999;font-size:12px;margin-right:6px;">#${p.id}</span><span style="font-size:14px;font-weight:600;">${esc(p.ja)}</span></div>
+        <span style="font-size:12px;color:#999;transform:${open ? "rotate(180deg)" : "none"};">▼</span>
+      </div>${body}
+    </div>`;
+  }).join("");
+
+  app.innerHTML = `
+  <div style="padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <span class="clickable" id="back" style="font-size:14px;color:#666;">← 戻る</span>
+      <span style="font-size:16px;font-weight:600;">📒 単語帳</span>
+      <span style="width:40px;"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">${items}</div>
+  </div>`;
+
+  document.getElementById("back").onclick = () => go("home");
+  app.querySelectorAll("[data-toggle]").forEach(el => el.onclick = () => { openId = openId === +el.dataset.toggle ? null : +el.dataset.toggle; renderList(); });
+  app.querySelectorAll("[data-speak]").forEach(el => el.onclick = (e) => { e.stopPropagation(); speak(el.dataset.speak); });
+};
+
+// ===== DASHBOARD =====
+const renderDashboard = () => {
+  const rows = PHRASES.map(p => {
+    const s = progress[p.id];
+    const st = getStatus(s);
+    const rate = s && s.total > 0 ? Math.round((s.correct / s.total) * 100) : null;
+    const sd = STATUS[st];
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:#f8fafc;font-size:13px;">
+      <div style="flex:1;min-width:0;">
+        <span style="color:#999;margin-right:6px;">#${p.id}</span>
+        <span style="font-weight:500;">${esc(p.ja.length > 18 ? p.ja.slice(0, 18) + "…" : p.ja)}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        ${rate !== null ? `<span style="font-size:11px;color:#999;">${rate}% (${s.total}回)</span>` : ""}
+        <span style="background:${sd.bg};color:${sd.text};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">${sd.label}</span>
+      </div>
+    </div>`;
+  }).join("");
+
+  app.innerHTML = `
+  <div style="padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <span class="clickable" id="back" style="font-size:14px;color:#666;">← 戻る</span>
+      <span style="font-size:16px;font-weight:600;">📊 ダッシュボード</span>
+      <span style="width:40px;"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">${rows}</div>
+  </div>`;
+  document.getElementById("back").onclick = () => go("home");
+};
+
+render();
+</script>
+</body>
+</html>
